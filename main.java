@@ -790,3 +790,102 @@ public final class TruckaJumpa {
     // -------------------------------------------------------------------------
     // Level description
     // -------------------------------------------------------------------------
+    public static String getLevelDescription(final int level) {
+        if (level <= 0) return "Invalid level";
+        if (level <= 2) return "Easy. Slow obstacles.";
+        if (level <= 5) return "Medium. More speed.";
+        if (level <= 8) return "Hard. Tight timing.";
+        return "Very hard. Expert jumps.";
+    }
+
+    public int getObstacleSpeedForLevel() {
+        return config.getObstacleBaseSpeed() + (state.getLevel() / 2);
+    }
+
+    public int getPointsPerClear() {
+        return config.getPointsPerObstacle() + state.getLevel() * 5;
+    }
+
+    public String getStateDigest() {
+        return "L" + state.getLevel() + " S" + state.getScore() + " Lives" + state.getLives()
+            + " Tick" + state.getTickCounter() + " Jump" + state.getJumpTicksLeft()
+            + (state.isGameOver() ? " GO" : "") + " Obs" + state.getObstacles().size();
+    }
+
+    public boolean wouldCollideAtTruckPosition() {
+        if (state.getJumpTicksLeft() > 0) return false;
+        int truckPos = config.getTruckPosition();
+        for (TruckaObstacle ob : state.getObstacles()) {
+            if (ob.getPosition() <= truckPos && ob.getPosition() + ob.getWidth() > truckPos) return true;
+        }
+        return false;
+    }
+
+    public void tick(final int count) {
+        for (int i = 0; i < count; i++) {
+            tick();
+            if (state.isGameOver()) break;
+        }
+    }
+
+    public static final long TICK_MS = 1000 / RETRO_FPS;
+
+    public static int ticksFromElapsedMs(final long elapsedMs) {
+        return (int) (elapsedMs / TICK_MS);
+    }
+
+    public static String getContractInfo() {
+        return "TruckaJumpa v1 " + TRUCKA_CONTRACT_ID + " " + TRUCKA_VERSION_HASH;
+    }
+
+    public static boolean isContractId(final String id) { return TRUCKA_CONTRACT_ID.equals(id); }
+    public static boolean isVersionHash(final String hash) { return TRUCKA_VERSION_HASH.equals(hash); }
+
+    public int getTrackLength() { return config.getTrackLength(); }
+    public int getTruckPosition() { return config.getTruckPosition(); }
+    public int getJumpDurationTicks() { return config.getJumpDurationTicks(); }
+    public static int getTrackLengthConstant() { return TRACK_LENGTH; }
+    public static int getJumpDurationConstant() { return JUMP_DURATION_TICKS; }
+    public static int getPointsPerObstacleConstant() { return POINTS_PER_OBSTACLE; }
+    public static int getPointsLevelBonusConstant() { return POINTS_LEVEL_BONUS; }
+
+    public int getNextSpawnTick() {
+        int interval = config.getObstacleSpawnInterval();
+        int t = state.getTickCounter();
+        if (t == 0) return interval;
+        return interval - (t % interval);
+    }
+
+    public boolean isDefaultConfig() {
+        return config.getTrackLength() == TRACK_LENGTH
+            && config.getJumpDurationTicks() == JUMP_DURATION_TICKS
+            && config.getLives() == INITIAL_LIVES
+            && config.getObstacleBaseSpeed() == OBSTACLE_BASE_SPEED;
+    }
+
+    public static boolean isDefaultConfig(final TruckaJumpaConfig config) {
+        if (config == null) return false;
+        return config.getTrackLength() == TRACK_LENGTH
+            && config.getJumpDurationTicks() == JUMP_DURATION_TICKS
+            && config.getLives() == INITIAL_LIVES;
+    }
+
+    public int getObstacleCountInRange(final int fromPos, final int toPos) {
+        int n = 0;
+        for (TruckaObstacle ob : state.getObstacles()) {
+            if (ob.getPosition() <= toPos && ob.getPosition() + ob.getWidth() >= fromPos) n++;
+        }
+        return n;
+    }
+
+    public TruckaJumpaSnapshot getSnapshotAt(final int tickLimit) {
+        TruckaJumpaState copy = TruckaJumpaState.copyFrom(state);
+        TruckaJumpa g = new TruckaJumpa(config, rng.nextLong());
+        g.state = copy;
+        for (int i = 0; i < tickLimit && !g.state.isGameOver(); i++) g.tick();
+        return g.getSnapshot();
+    }
+
+    // -------------------------------------------------------------------------
+    // Cell type for rendering (track position -> cell content)
+    // -------------------------------------------------------------------------
