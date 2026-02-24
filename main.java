@@ -1780,3 +1780,94 @@ public final class TruckaJumpa {
     public boolean isObstacle(final int pos) { return hasObstacleAt(pos); }
     public String getGrid() { return toRetroGridString(); }
     public String getCompact() { return toCompactState(); }
+    public String getDigest() { return getStateDigest(); }
+    public String getSummary() { return getStateSummary(); }
+    public long getChecksum() { return getStateChecksum(); }
+    public int getMaxScoreApprox() { return getMaxPossibleScoreApprox(); }
+    public int getSpawnInterval() { return getSpawnIntervalForLevel(); }
+    public boolean getShouldLevelUp() { return shouldLevelComplete(); }
+    public boolean getIsDefault() { return isDefaultConfig(); }
+    public boolean getValidEncoded(final String enc) { return validateEncodedState(enc); }
+    public int getScoreFromEnc(final String enc) { return getScoreFromEncoded(enc); }
+    public String getLevelDesc(final int lvl) { return getLevelDescription(lvl); }
+    public String getLevelDescUI(final int lvl) { return getLevelDescriptionForUI(lvl); }
+    public int getKeyAction(final String key) { return actionFromKey(key); }
+    public boolean getValidConfig() { return isValidConfig(config); }
+    public boolean getStateEq(final TruckaJumpa o) { return stateEquals(o); }
+    public int getObsInRange(final int a, final int b) { return getObstacleCountInRange(a, b); }
+    public boolean getHasObsInRange(final int a, final int b) { return hasObstacleInRange(a, b); }
+    public int getObsAt(final int pos) { return getObstacleAtPosition(pos); }
+    public int getObsPosByIdx(final int idx) { return getObstaclePosition(idx); }
+    public int getObsWidthByIdx(final int idx) { return getObstacleWidth(idx); }
+    public int getSpeedAtLevel(final int lvl) { return getObstacleSpeedAtLevel(lvl); }
+    public int getPointsAtLevel(final int lvl) { return getPointsPerClearAtLevel(lvl); }
+
+    public static final String TRUCKA_GAME_TITLE = "TruckaJumpa";
+    public static final String TRUCKA_GAME_SUBTITLE = "Sequel to Frogga";
+    public static String getGameTitle() { return TRUCKA_GAME_TITLE; }
+    public static String getGameSubtitle() { return TRUCKA_GAME_SUBTITLE; }
+    public String getTitle() { return TRUCKA_GAME_TITLE; }
+    public String getSubtitle() { return TRUCKA_GAME_SUBTITLE; }
+    public static final int TRUCKA_DISPLAY_DEFAULT_WIDTH = 672;
+    public static final int TRUCKA_DISPLAY_DEFAULT_HEIGHT = 56;
+    public static int getDisplayDefaultWidth() { return TRUCKA_DISPLAY_DEFAULT_WIDTH; }
+    public static int getDisplayDefaultHeight() { return TRUCKA_DISPLAY_DEFAULT_HEIGHT; }
+    public static final long TRUCKA_MS_PER_TICK = 71;
+    public static long getMsPerTick() { return TRUCKA_MS_PER_TICK; }
+    public long getMsPerTickInstance() { return 1000L / RETRO_FPS; }
+    public static final int TRUCKA_MAX_OBSTACLES_ON_SCREEN = 8;
+    public static int getMaxObstaclesOnScreen() { return TRUCKA_MAX_OBSTACLES_ON_SCREEN; }
+    public boolean isOverObstacleLimit() { return state.getObstacles().size() > TRUCKA_MAX_OBSTACLES_ON_SCREEN; }
+    public static final String TRUCKA_WEB_TITLE = "RetroGameESP - TruckaJumpa";
+    public static String getWebTitle() { return TRUCKA_WEB_TITLE; }
+    public static final int TRUCKA_DEFAULT_FPS_WEB = 14;
+    public static int getDefaultFpsWeb() { return TRUCKA_DEFAULT_FPS_WEB; }
+
+    public static final String TRUCKA_WEB_INTERFACE = "RetroGameESP";
+    public static String getWebInterfaceName() { return TRUCKA_WEB_INTERFACE; }
+    public static final int TRUCKA_MIN_TRACK_LENGTH = 5;
+    public static final int TRUCKA_MAX_TRACK_LENGTH = 50;
+    public static int getMinTrackLength() { return TRUCKA_MIN_TRACK_LENGTH; }
+    public static int getMaxTrackLength() { return TRUCKA_MAX_TRACK_LENGTH; }
+    public static boolean isTrackLengthValid(final int len) { return len >= TRUCKA_MIN_TRACK_LENGTH && len <= TRUCKA_MAX_TRACK_LENGTH; }
+    public boolean isTrackLengthValidForConfig() { return isTrackLengthValid(config.getTrackLength()); }
+
+    public static final int TRUCKA_JUMP_KEY_SPACE = 0;
+    public static final int TRUCKA_JUMP_KEY_UP = 1;
+    public static int getJumpKeySpace() { return TRUCKA_JUMP_KEY_SPACE; }
+    public static int getJumpKeyUp() { return TRUCKA_JUMP_KEY_UP; }
+    public static String getWebInterfaceNameStatic() { return TRUCKA_WEB_INTERFACE; }
+    public String getWebInterfaceNameInstance() { return TRUCKA_WEB_INTERFACE; }
+    public static int getObstacleTypeBarrierConstant() { return OBSTACLE_TYPE_BARRIER; }
+    public static int getObstacleTypePitConstant() { return OBSTACLE_TYPE_PIT; }
+    public int getObstacleTypeBarrierInstance() { return OBSTACLE_TYPE_BARRIER; }
+    public int getObstacleTypePitInstance() { return OBSTACLE_TYPE_PIT; }
+
+    public static final int TRUCKA_SPAWN_DENOM_DEFAULT = 8;
+    public static int getSpawnDenomDefault() { return TRUCKA_SPAWN_DENOM_DEFAULT; }
+    public static final int TRUCKA_POINTS_PER_OBSTACLE_DEFAULT = 80;
+    public static final int TRUCKA_POINTS_LEVEL_BONUS_DEFAULT = 60;
+    public static int getPointsPerObstacleDefault() { return TRUCKA_POINTS_PER_OBSTACLE_DEFAULT; }
+    public static int getPointsLevelBonusDefault() { return TRUCKA_POINTS_LEVEL_BONUS_DEFAULT; }
+    public static final String TRUCKA_ERR_CRASH_CODE = "TruckaCrashed";
+    public static final String TRUCKA_EVT_JUMP_CODE = "TruckaJump";
+    public static String getErrCrashCode() { return TRUCKA_ERR_CRASH_CODE; }
+    public static String getEvtJumpCode() { return TRUCKA_EVT_JUMP_CODE; }
+
+    public static final int TRUCKA_DISPLAY_CELL_W = 28;
+    public static final int TRUCKA_DISPLAY_CELL_H = 56;
+    public static int getDisplayCellW() { return TRUCKA_DISPLAY_CELL_W; }
+    public static int getDisplayCellH() { return TRUCKA_DISPLAY_CELL_H; }
+
+    public static void main(final String[] args) {
+        TruckaJumpa game = new TruckaJumpa();
+        System.out.println("TruckaJumpa " + TRUCKA_CONTRACT_ID);
+        System.out.println("Level " + game.getState().getLevel() + " | Lives " + game.getState().getLives());
+        game.jump();
+        game.tick();
+        game.tick();
+        System.out.println("Jump ticks left: " + game.getState().getJumpTicksLeft());
+        System.out.println("Score: " + game.getState().getScore());
+    }
+}
+
