@@ -1483,3 +1483,102 @@ public final class TruckaJumpa {
 
     public static int clampTrackPosition(final int pos, final TruckaJumpaConfig config) {
         if (config == null) return Math.max(0, Math.min(pos, TRACK_LENGTH - 1));
+        return Math.max(0, Math.min(pos, config.getTrackLength() - 1));
+    }
+
+    public static int clampObstacleWidth(final int width, final TruckaJumpaConfig config) {
+        if (config == null) return Math.max(MIN_OBSTACLE_WIDTH, Math.min(width, MAX_OBSTACLE_WIDTH));
+        return Math.max(config.getMinObstacleWidth(), Math.min(width, config.getMaxObstacleWidth()));
+    }
+
+    public int getRecommendedJumpTick() {
+        int truckPos = config.getTruckPosition();
+        int speed = getObstacleSpeedForLevel();
+        int bestTick = -1;
+        int bestDist = Integer.MAX_VALUE;
+        for (TruckaObstacle ob : state.getObstacles()) {
+            if (ob.getPosition() > truckPos) {
+                int ticksToReach = (ob.getPosition() - truckPos) / speed;
+                int dist = Math.abs(ticksToReach - config.getJumpDurationTicks() / 2);
+                if (dist < bestDist) { bestDist = dist; bestTick = ticksToReach; }
+            }
+        }
+        return bestTick;
+    }
+
+    public String getStateSummary() {
+        return "TruckaJumpa L" + state.getLevel() + " S" + state.getScore() + " Lives" + state.getLives()
+            + " Jump" + state.getJumpTicksLeft() + " Obs" + state.getObstacles().size()
+            + (state.isGameOver() ? " GAMEOVER" : "");
+    }
+
+    public static final int TRUCKA_FLAG_JUMP_READY = 0x01;
+    public static final int TRUCKA_FLAG_GAME_OVER = 0x02;
+    public static final int TRUCKA_FLAG_LEVEL_COMPLETE = 0x04;
+    public static final int TRUCKA_FLAG_TRUCK_IN_AIR = 0x08;
+
+    public int getStateFlags() {
+        int f = 0;
+        if (canJump()) f |= TRUCKA_FLAG_JUMP_READY;
+        if (state.isGameOver()) f |= TRUCKA_FLAG_GAME_OVER;
+        if (state.isLevelComplete()) f |= TRUCKA_FLAG_LEVEL_COMPLETE;
+        if (state.getJumpTicksLeft() > 0) f |= TRUCKA_FLAG_TRUCK_IN_AIR;
+        return f;
+    }
+
+    public boolean hasFlag(final int flag) { return (getStateFlags() & flag) != 0; }
+    public boolean hasJumpReadyFlag() { return hasFlag(TRUCKA_FLAG_JUMP_READY); }
+    public boolean hasGameOverFlag() { return hasFlag(TRUCKA_FLAG_GAME_OVER); }
+    public boolean hasLevelCompleteFlag() { return hasFlag(TRUCKA_FLAG_LEVEL_COMPLETE); }
+    public boolean hasTruckInAirFlag() { return hasFlag(TRUCKA_FLAG_TRUCK_IN_AIR); }
+
+    public static int getTruckaFlagJumpReady() { return TRUCKA_FLAG_JUMP_READY; }
+    public static int getTruckaFlagGameOver() { return TRUCKA_FLAG_GAME_OVER; }
+    public static int getTruckaFlagLevelComplete() { return TRUCKA_FLAG_LEVEL_COMPLETE; }
+    public static int getTruckaFlagTruckInAir() { return TRUCKA_FLAG_TRUCK_IN_AIR; }
+
+    public int getClearedCountEstimate() {
+        return state.getScore() / getPointsPerClear();
+    }
+
+    public int getScoreToNextBonus() {
+        return config.getPointsLevelBonus();
+    }
+
+    public boolean isEligibleForLevelBonus() {
+        return state.isLevelComplete();
+    }
+
+    public int getTrackLengthForDisplay() { return config.getTrackLength(); }
+    public int getTruckPositionForDisplay() { return config.getTruckPosition(); }
+    public int getJumpDurationForDisplay() { return config.getJumpDurationTicks(); }
+    public int getLivesForDisplay() { return state.getLives(); }
+    public int getScoreForDisplay() { return state.getScore(); }
+    public int getLevelForDisplay() { return state.getLevel(); }
+    public boolean getGameOverForDisplay() { return state.isGameOver(); }
+    public boolean getLevelCompleteForDisplay() { return state.isLevelComplete(); }
+    public int getJumpTicksLeftForDisplay() { return state.getJumpTicksLeft(); }
+    public int getObstacleCountForDisplay() { return state.getObstacles().size(); }
+    public int getObstacleSpeedForDisplay() { return getObstacleSpeedForLevel(); }
+    public int getPointsPerClearForDisplay() { return getPointsPerClear(); }
+    public int getNextSpawnTickForDisplay() { return getNextSpawnTick(); }
+    public String getLastEventForDisplay() { return getLastEventDescription(); }
+    public int getLastEventCodeForDisplay() { return lastEventCode; }
+    public float getJumpProgressForDisplay() { return getJumpProgress(); }
+    public int getStateFlagsForDisplay() { return getStateFlags(); }
+    public String getStateSummaryForDisplay() { return getStateSummary(); }
+    public String getCurrentLevelDescriptionForDisplay() { return getCurrentLevelDescription(); }
+    public String getContractIdForDisplay() { return formatContractIdShort(); }
+    public String getSequelInfoForDisplay() { return getSequelInfo(); }
+    public boolean getCanJumpForDisplay() { return canJump(); }
+    public boolean getIsJumpingForDisplay() { return isJumping(); }
+    public boolean getIsActiveForDisplay() { return isActive(); }
+    public boolean getWouldCollideForDisplay() { return wouldCollideAtTruckPosition(); }
+    public int getClosestObstacleForDisplay() { return getClosestObstaclePosition(); }
+    public int getTicksUntilObstacleForDisplay() { return getTicksUntilNextObstacleAtTruck(); }
+    public int getLeftmostObstacleForDisplay() { return getLeftmostObstaclePosition(); }
+    public int getRightmostObstacleEndForDisplay() { return getRightmostObstacleEndPosition(); }
+    public int getTotalObstacleWidthForDisplay() { return getTotalObstacleWidth(); }
+    public int getDisplayWidthPxForDisplay() { return getDisplayWidthPx(); }
+    public int getDisplayHeightPxForDisplay() { return getDisplayHeightPx(); }
+    public String getPaletteTruckHexForDisplay() { return getPaletteTruckHex(); }
