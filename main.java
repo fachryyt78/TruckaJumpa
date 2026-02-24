@@ -394,3 +394,102 @@ public final class TruckaJumpa {
             final List<ObstacleSnapshot> obstacles
         ) {
             this.lives = lives;
+            this.score = score;
+            this.level = level;
+            this.jumpTicksLeft = jumpTicksLeft;
+            this.gameOver = gameOver;
+            this.obstacles = obstacles == null ? Collections.emptyList() : new ArrayList<>(obstacles);
+        }
+
+        public int getLives() { return lives; }
+        public int getScore() { return score; }
+        public int getLevel() { return level; }
+        public int getJumpTicksLeft() { return jumpTicksLeft; }
+        public boolean isGameOver() { return gameOver; }
+        public List<ObstacleSnapshot> getObstacles() { return obstacles; }
+    }
+
+    public static final class ObstacleSnapshot {
+        private final int position;
+        private final int width;
+
+        public ObstacleSnapshot(final int position, final int width) {
+            this.position = position;
+            this.width = width;
+        }
+
+        public int getPosition() { return position; }
+        public int getWidth() { return width; }
+    }
+
+    public TruckaJumpaSnapshot getSnapshot() {
+        List<ObstacleSnapshot> list = new ArrayList<>();
+        for (TruckaObstacle ob : state.getObstacles()) {
+            list.add(new ObstacleSnapshot(ob.getPosition(), ob.getWidth()));
+        }
+        return new TruckaJumpaSnapshot(
+            state.getLives(),
+            state.getScore(),
+            state.getLevel(),
+            state.getJumpTicksLeft(),
+            state.isGameOver(),
+            list
+        );
+    }
+
+    // -------------------------------------------------------------------------
+    // High scores
+    // -------------------------------------------------------------------------
+    public static final class TruckaHighScoreEntry {
+        private final int score;
+        private final int level;
+        private final long timestamp;
+
+        public TruckaHighScoreEntry(final int score, final int level, final long timestamp) {
+            this.score = score;
+            this.level = level;
+            this.timestamp = timestamp;
+        }
+
+        public int getScore() { return score; }
+        public int getLevel() { return level; }
+        public long getTimestamp() { return timestamp; }
+    }
+
+    private final List<TruckaHighScoreEntry> highScores = new ArrayList<>();
+
+    public List<TruckaHighScoreEntry> getHighScores() {
+        return Collections.unmodifiableList(highScores);
+    }
+
+    public void submitScoreIfHigh() {
+        if (state.isGameOver() && state.getScore() > 0) {
+            if (highScores.size() < HIGH_SCORE_CAP || state.getScore() > highScores.get(highScores.size() - 1).getScore()) {
+                highScores.add(new TruckaHighScoreEntry(state.getScore(), state.getLevel(), System.currentTimeMillis()));
+                highScores.sort((a, b) -> Integer.compare(b.getScore(), a.getScore()));
+                if (highScores.size() > HIGH_SCORE_CAP) {
+                    highScores.remove(highScores.size() - 1);
+                }
+            }
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Serialization
+    // -------------------------------------------------------------------------
+    public String encodeState() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(state.getLives()).append(',').append(state.getScore()).append(',').append(state.getLevel()).append(',')
+          .append(state.getTickCounter()).append(',').append(state.getJumpTicksLeft()).append(',')
+          .append(state.isGameOver()).append(',').append(state.isLevelComplete()).append('|');
+        for (TruckaObstacle ob : state.getObstacles()) {
+            sb.append(ob.getPosition()).append(',').append(ob.getWidth()).append(';');
+        }
+        return sb.toString();
+    }
+
+    public static int getScoreFromEncoded(final String encoded) {
+        if (encoded == null || !encoded.contains("|")) return 0;
+        String[] parts = encoded.split("\\|")[0].split(",");
+        return parts.length >= 2 ? Integer.parseInt(parts[1]) : 0;
+    }
