@@ -1285,3 +1285,102 @@ public final class TruckaJumpa {
         return max;
     }
 
+    // -------------------------------------------------------------------------
+    // Documentation: TruckaJumpa is the sequel to Frogget (Frogga). Same universe.
+    // Truck stays at position 0; obstacles move left. Jump duration in ticks.
+    // Collision when obstacle overlaps truck position and truck is grounded.
+    // Cleared when obstacle moves fully past truck; score added. Spawn every N ticks.
+    // Level increases difficulty (speed, spawn rate). No token, no claim.
+    // Contract identity: TRUCKA_CONTRACT_ID, TRUCKA_VERSION_HASH, TRUCKA_DOMAIN_SEED.
+    // All config is constructor-set; no readonly; use final for constants.
+    // -------------------------------------------------------------------------
+
+    public int getObstacleAtPosition(final int pos) {
+        int i = 0;
+        for (TruckaObstacle ob : state.getObstacles()) {
+            if (pos >= ob.getPosition() && pos < ob.getPosition() + ob.getWidth()) return i;
+            i++;
+        }
+        return -1;
+    }
+
+    public int getObstaclePosition(final int index) {
+        if (index < 0 || index >= state.getObstacles().size()) return -1;
+        return state.getObstacles().get(index).getPosition();
+    }
+
+    public int getObstacleWidth(final int index) {
+        if (index < 0 || index >= state.getObstacles().size()) return 0;
+        return state.getObstacles().get(index).getWidth();
+    }
+
+    public boolean hasObstacleInRange(final int from, final int to) {
+        for (TruckaObstacle ob : state.getObstacles()) {
+            if (ob.getPosition() + ob.getWidth() > from && ob.getPosition() < to) return true;
+        }
+        return false;
+    }
+
+    public int countObstaclesInRange(final int from, final int to) {
+        int n = 0;
+        for (TruckaObstacle ob : state.getObstacles()) {
+            if (ob.getPosition() + ob.getWidth() > from && ob.getPosition() < to) n++;
+        }
+        return n;
+    }
+
+    public int getSafeJumpTicksBeforeCollision() {
+        if (state.getJumpTicksLeft() > 0) return state.getJumpTicksLeft();
+        int truckPos = config.getTruckPosition();
+        int speed = getObstacleSpeedForLevel();
+        int minTicks = Integer.MAX_VALUE;
+        for (TruckaObstacle ob : state.getObstacles()) {
+            if (ob.getPosition() > truckPos) {
+                int ticks = (ob.getPosition() - truckPos) / speed;
+                if (ticks < minTicks) minTicks = ticks;
+            }
+        }
+        return minTicks == Integer.MAX_VALUE ? config.getJumpDurationTicks() : Math.min(minTicks, config.getJumpDurationTicks());
+    }
+
+    public boolean wouldJumpClearNextObstacle() {
+        int truckPos = config.getTruckPosition();
+        int speed = getObstacleSpeedForLevel();
+        int jumpTicks = config.getJumpDurationTicks();
+        for (TruckaObstacle ob : state.getObstacles()) {
+            if (ob.getPosition() > truckPos) {
+                int ticksToReach = (ob.getPosition() - truckPos) / speed;
+                int ticksToClear = (ob.getPosition() + ob.getWidth() - truckPos) / speed;
+                if (ticksToReach <= jumpTicks && ticksToClear > jumpTicks) return false;
+            }
+        }
+        return true;
+    }
+
+    public static int getDefaultTrackLength() { return TRACK_LENGTH; }
+    public static int getDefaultTruckPosition() { return TRUCK_POSITION; }
+    public static int getDefaultJumpDurationTicks() { return JUMP_DURATION_TICKS; }
+    public static int getDefaultInitialLives() { return INITIAL_LIVES; }
+    public static int getDefaultObstacleBaseSpeed() { return OBSTACLE_BASE_SPEED; }
+    public static int getDefaultMaxLevel() { return MAX_LEVEL; }
+    public static int getDefaultPointsPerObstacle() { return POINTS_PER_OBSTACLE; }
+    public static int getDefaultPointsLevelBonus() { return POINTS_LEVEL_BONUS; }
+    public static int getDefaultObstacleSpawnInterval() { return OBSTACLE_SPAWN_INTERVAL; }
+    public static int getDefaultMinObstacleWidth() { return MIN_OBSTACLE_WIDTH; }
+    public static int getDefaultMaxObstacleWidth() { return MAX_OBSTACLE_WIDTH; }
+    public static int getDefaultHighScoreCap() { return HIGH_SCORE_CAP; }
+    public static int getKeyJump() { return KEY_JUMP; }
+    public static int getKeyNone() { return KEY_NONE; }
+    public static int getEvtNone() { return EVT_NONE; }
+    public static int getEvtAlreadyJumping() { return EVT_ALREADY_JUMPING; }
+    public static int getEvtJumpCode() { return EVT_JUMP; }
+    public static int getEvtTickCode() { return EVT_TICK; }
+    public static int getEvtCrashCode() { return EVT_CRASH; }
+    public static int getEvtGameOverCode() { return EVT_GAME_OVER; }
+    public static int getEvtClearedCode() { return EVT_CLEARED; }
+    public static int getEvtLevelUpCode() { return EVT_LEVEL_UP; }
+    public static int getAnimTruckGround() { return ANIM_TRUCK_GROUND; }
+    public static int getAnimTruckAir() { return ANIM_TRUCK_AIR; }
+    public static int getSoundJump() { return SOUND_JUMP; }
+    public static int getSoundCrash() { return SOUND_CRASH; }
+    public static int getSoundClear() { return SOUND_CLEAR; }
