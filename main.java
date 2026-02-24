@@ -988,3 +988,102 @@ public final class TruckaJumpa {
         TruckaJumpa that = (TruckaJumpa) o;
         return Objects.equals(config, that.config) && state.getScore() == that.getState().getScore()
             && state.getLevel() == that.getState().getLevel() && state.getLives() == that.getState().getLives();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(config, state.getScore(), state.getLevel(), state.getTickCounter());
+    }
+
+    public void startNewGameWithResetStats() {
+        startNewGame();
+        resetSessionStats();
+    }
+
+    // -------------------------------------------------------------------------
+    // Constants for display (retro)
+    // -------------------------------------------------------------------------
+    public static final int ANIM_TRUCK_GROUND = 0;
+    public static final int ANIM_TRUCK_AIR = 1;
+    public static final int SOUND_JUMP = 0;
+    public static final int SOUND_CRASH = 1;
+    public static final int SOUND_CLEAR = 2;
+    public static final int SOUND_LEVEL = 3;
+
+    public int getTruckAnimationFrame() {
+        return state.getJumpTicksLeft() > 0 ? ANIM_TRUCK_AIR : ANIM_TRUCK_GROUND;
+    }
+
+    // -------------------------------------------------------------------------
+    // Obstacle iterator
+    // -------------------------------------------------------------------------
+    public List<ObstacleSnapshot> getObstaclesSnapshot() {
+        List<ObstacleSnapshot> list = new ArrayList<>();
+        for (TruckaObstacle ob : state.getObstacles()) {
+            list.add(new ObstacleSnapshot(ob.getPosition(), ob.getWidth()));
+        }
+        return list;
+    }
+
+    public int getClosestObstaclePosition() {
+        int truckPos = config.getTruckPosition();
+        int closest = config.getTrackLength();
+        for (TruckaObstacle ob : state.getObstacles()) {
+            if (ob.getPosition() >= truckPos && ob.getPosition() < closest) closest = ob.getPosition();
+        }
+        return closest == config.getTrackLength() ? -1 : closest;
+    }
+
+    public int getTicksUntilNextObstacleAtTruck() {
+        int truckPos = config.getTruckPosition();
+        int speed = getObstacleSpeedForLevel();
+        int minTicks = Integer.MAX_VALUE;
+        for (TruckaObstacle ob : state.getObstacles()) {
+            if (ob.getPosition() > truckPos) {
+                int ticks = (ob.getPosition() - truckPos) / speed;
+                if (ticks < minTicks) minTicks = ticks;
+            }
+        }
+        return minTicks == Integer.MAX_VALUE ? -1 : minTicks;
+    }
+
+    // -------------------------------------------------------------------------
+    // Level completion (optional: complete after N cleared)
+    // -------------------------------------------------------------------------
+    public static final int OBSTACLES_PER_LEVEL = 15;
+
+    public boolean shouldLevelComplete() {
+        return state.getScore() > 0 && (state.getScore() - (state.getLevel() - 1) * config.getPointsLevelBonus())
+            / getPointsPerClear() >= OBSTACLES_PER_LEVEL * state.getLevel();
+    }
+
+    public void checkAndSetLevelComplete() {
+        if (shouldLevelComplete()) state.setLevelComplete(true);
+    }
+
+    // -------------------------------------------------------------------------
+    // More getters for config
+    // -------------------------------------------------------------------------
+    public int getConfigTrackLength() { return config.getTrackLength(); }
+    public int getConfigLives() { return config.getLives(); }
+    public int getConfigObstacleBaseSpeed() { return config.getObstacleBaseSpeed(); }
+    public int getConfigMaxLevel() { return config.getMaxLevel(); }
+    public int getConfigPointsPerObstacle() { return config.getPointsPerObstacle(); }
+    public int getConfigPointsLevelBonus() { return config.getPointsLevelBonus(); }
+    public int getConfigObstacleSpawnInterval() { return config.getObstacleSpawnInterval(); }
+    public int getConfigMinObstacleWidth() { return config.getMinObstacleWidth(); }
+    public int getConfigMaxObstacleWidth() { return config.getMaxObstacleWidth(); }
+
+    public static int getInitialLivesConstant() { return INITIAL_LIVES; }
+    public static int getObstacleSpawnIntervalConstant() { return OBSTACLE_SPAWN_INTERVAL; }
+    public static int getMinObstacleWidthConstant() { return MIN_OBSTACLE_WIDTH; }
+    public static int getMaxObstacleWidthConstant() { return MAX_OBSTACLE_WIDTH; }
+    public static int getHighScoreCapConstant() { return HIGH_SCORE_CAP; }
+    public static int getRetroFpsConstant() { return RETRO_FPS; }
+
+    public String getErrCrash() { return TRUCKA_ERR_CRASH; }
+    public String getEvtJump() { return TRUCKA_EVT_JUMP; }
+    public String getEvtCleared() { return TRUCKA_EVT_CLEARED; }
+    public String getEvtGameOver() { return TRUCKA_EVT_GAME_OVER; }
+
+    // -------------------------------------------------------------------------
