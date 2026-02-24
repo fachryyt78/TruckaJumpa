@@ -1087,3 +1087,102 @@ public final class TruckaJumpa {
     public String getEvtGameOver() { return TRUCKA_EVT_GAME_OVER; }
 
     // -------------------------------------------------------------------------
+    // Level descriptions for UI
+    // -------------------------------------------------------------------------
+    private static final String[] LEVEL_DESCRIPTIONS = {
+        "Level 1: Get used to the jump timing.",
+        "Level 2: Obstacles move a bit faster.",
+        "Level 3: More obstacles, stay sharp.",
+        "Level 4: Speed increases. Time your jumps.",
+        "Level 5: Hard. Quick reactions needed.",
+        "Level 6: Very hard. Expert only.",
+        "Level 7: Near maximum difficulty.",
+        "Level 8: Maximum speed and density.",
+        "Level 9+: Ultimate challenge."
+    };
+
+    public static String getLevelDescriptionForUI(final int level) {
+        if (level <= 0) return "Invalid level";
+        int idx = Math.min(level - 1, LEVEL_DESCRIPTIONS.length - 1);
+        return LEVEL_DESCRIPTIONS[idx >= 0 ? idx : 0];
+    }
+
+    public String getCurrentLevelDescription() {
+        return getLevelDescriptionForUI(state.getLevel());
+    }
+
+    // -------------------------------------------------------------------------
+    // Frogget / Frogga sequel compatibility (same universe)
+    // -------------------------------------------------------------------------
+    public static final int FROGGET_TRACK_COLS = 11;
+    public static final int TRUCKA_TRACK_LENGTH_DEFAULT = 24;
+
+    public static boolean isSequelToFrogget() {
+        return true;
+    }
+
+    public static String getUniverseName() {
+        return "FroggaUniverse";
+    }
+
+    // -------------------------------------------------------------------------
+    // Checksum / integrity (for save validation)
+    // -------------------------------------------------------------------------
+    public long getStateChecksum() {
+        long h = state.getLives() * 31L + state.getScore() * 37L + state.getLevel() * 41L + state.getTickCounter() * 43L;
+        for (TruckaObstacle ob : state.getObstacles()) {
+            h = h * 59 + ob.getPosition() * 61 + ob.getWidth() * 67;
+        }
+        return h;
+    }
+
+    public static boolean validateEncodedState(final String encoded) {
+        if (encoded == null || !encoded.contains("|")) return false;
+        String[] parts = encoded.split("\\|")[0].split(",");
+        return parts.length >= 7;
+    }
+
+    // -------------------------------------------------------------------------
+    // More presets
+    // -------------------------------------------------------------------------
+    public static TruckaJumpaConfig presetLongTrack() {
+        return new TruckaJumpaConfig(40, 0, 8, 3, 1, 99, 80, 60, 12, 1, 3);
+    }
+
+    public static TruckaJumpaConfig presetShortJump() {
+        return new TruckaJumpaConfig(16, 0, 3, 2, 2, 50, 100, 70, 4, 2, 4);
+    }
+
+    // -------------------------------------------------------------------------
+    // Window / viewport (for UI)
+    // -------------------------------------------------------------------------
+    public static final int VIEWPORT_TRACK_CELLS = 12;
+    public static final int VIEWPORT_OFFSET_MAX = 12;
+
+    public int getViewportStart(final int offset) {
+        int start = config.getTruckPosition() + offset - VIEWPORT_TRACK_CELLS / 2;
+        return Math.max(0, Math.min(start, config.getTrackLength() - VIEWPORT_TRACK_CELLS));
+    }
+
+    public int getVisibleObstacleCount(final int viewportStart) {
+        int end = viewportStart + VIEWPORT_TRACK_CELLS;
+        int n = 0;
+        for (TruckaObstacle ob : state.getObstacles()) {
+            if (ob.getPosition() + ob.getWidth() > viewportStart && ob.getPosition() < end) n++;
+        }
+        return n;
+    }
+
+    // -------------------------------------------------------------------------
+    // Debug / test
+    // -------------------------------------------------------------------------
+    public boolean stateEquals(final TruckaJumpa other) {
+        if (other == null) return false;
+        if (state.getLives() != other.getState().getLives()) return false;
+        if (state.getScore() != other.getState().getScore()) return false;
+        if (state.getLevel() != other.getState().getLevel()) return false;
+        if (state.getObstacles().size() != other.getState().getObstacles().size()) return false;
+        return true;
+    }
+
+    public String toCompactState() {
