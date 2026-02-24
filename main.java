@@ -1186,3 +1186,102 @@ public final class TruckaJumpa {
     }
 
     public String toCompactState() {
+        return "L" + state.getLevel() + " S" + state.getScore() + " " + state.getLives() + " lives J" + state.getJumpTicksLeft();
+    }
+
+    // -------------------------------------------------------------------------
+    // Spawn logic (exposed for tests)
+    // -------------------------------------------------------------------------
+    public void spawnObstacleAt(final int position, final int width) {
+        state.getObstacles().add(new TruckaObstacle(position, width, OBSTACLE_TYPE_BARRIER));
+    }
+
+    public int getSpawnIntervalForLevel() {
+        return Math.max(2, config.getObstacleSpawnInterval() - state.getLevel() / 3);
+    }
+
+    // -------------------------------------------------------------------------
+    // Tick with optional auto level-complete check
+    // -------------------------------------------------------------------------
+    public void tickAndCheckLevelComplete() {
+        tick();
+        checkAndSetLevelComplete();
+    }
+
+    // -------------------------------------------------------------------------
+    // Additional constant accessors (for external tools / UI)
+    // -------------------------------------------------------------------------
+    public static int getObstacleTypeBarrier() { return OBSTACLE_TYPE_BARRIER; }
+    public static int getObstacleTypePit() { return OBSTACLE_TYPE_PIT; }
+    public static int getPaletteTruckRaw() { return PALETTE_TRUCK; }
+    public static int getPaletteBarrierRaw() { return PALETTE_BARRIER; }
+    public static int getPaletteTrackRaw() { return PALETTE_TRACK; }
+    public static int getDisplayCellW() { return DISPLAY_CELL_W; }
+    public static int getDisplayCellH() { return DISPLAY_CELL_H; }
+    public static int getViewportTrackCells() { return VIEWPORT_TRACK_CELLS; }
+    public static int getObstaclesPerLevel() { return OBSTACLES_PER_LEVEL; }
+    public static String getErrBounds() { return TRUCKA_ERR_BOUNDS; }
+    public static String getErrCrash() { return TRUCKA_ERR_CRASH; }
+    public static String getErrNoLives() { return TRUCKA_ERR_NO_LIVES; }
+    public static String getErrGameOver() { return TRUCKA_ERR_GAME_OVER; }
+    public static String getErrAlreadyJumping() { return TRUCKA_ERR_ALREADY_JUMPING; }
+    public static String getEvtJump() { return TRUCKA_EVT_JUMP; }
+    public static String getEvtCleared() { return TRUCKA_EVT_CLEARED; }
+    public static String getEvtCrash() { return TRUCKA_EVT_CRASH; }
+    public static String getEvtLevelUp() { return TRUCKA_EVT_LEVEL_UP; }
+    public static String getEvtGameOver() { return TRUCKA_EVT_GAME_OVER; }
+    public static String getEvtTick() { return TRUCKA_EVT_TICK; }
+
+    public int getStateLives() { return state.getLives(); }
+    public int getStateScore() { return state.getScore(); }
+    public int getStateLevel() { return state.getLevel(); }
+    public int getStateTickCounter() { return state.getTickCounter(); }
+    public int getStateJumpTicksLeft() { return state.getJumpTicksLeft(); }
+    public boolean getStateGameOver() { return state.isGameOver(); }
+    public boolean getStateLevelComplete() { return state.isLevelComplete(); }
+    public int getStateObstacleCount() { return state.getObstacles().size(); }
+
+    public boolean isGameOver() { return state.isGameOver(); }
+    public boolean isLevelComplete() { return state.isLevelComplete(); }
+    public boolean isTruckGrounded() { return state.getJumpTicksLeft() == 0; }
+    public boolean isTruckInAir() { return state.getJumpTicksLeft() > 0; }
+    public int getJumpTicksRemaining() { return state.getJumpTicksLeft(); }
+    public int getScore() { return state.getScore(); }
+    public int getLevel() { return state.getLevel(); }
+    public int getLives() { return state.getLives(); }
+    public int getTickCounter() { return state.getTickCounter(); }
+
+    public static int getMaxLevelConstant() { return MAX_LEVEL; }
+    public static long getTickMs() { return TICK_MS; }
+    public static long getGenesisTsConstant() { return TRUCKA_GENESIS_TS; }
+    public static int getChainIdConstant() { return TRUCKA_CHAIN_ID; }
+
+    /** Returns the number of ticks the truck remains in the air (0 if grounded). */
+    public int getAirTimeRemaining() { return state.getJumpTicksLeft(); }
+
+    /** Returns true if a jump can be triggered (grounded and game not over). */
+    public boolean isJumpAllowed() { return canJump(); }
+
+    public int getTotalObstacleWidth() {
+        int w = 0;
+        for (TruckaObstacle ob : state.getObstacles()) w += ob.getWidth();
+        return w;
+    }
+
+    public int getLeftmostObstaclePosition() {
+        int min = config.getTrackLength();
+        for (TruckaObstacle ob : state.getObstacles()) {
+            if (ob.getPosition() < min) min = ob.getPosition();
+        }
+        return min == config.getTrackLength() ? -1 : min;
+    }
+
+    public int getRightmostObstacleEndPosition() {
+        int max = -1;
+        for (TruckaObstacle ob : state.getObstacles()) {
+            int end = ob.getPosition() + ob.getWidth();
+            if (end > max) max = end;
+        }
+        return max;
+    }
+
