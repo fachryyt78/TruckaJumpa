@@ -295,3 +295,102 @@ public final class TruckaJumpa {
 
     // -------------------------------------------------------------------------
     // Inner: TruckaJumpaState
+    // -------------------------------------------------------------------------
+    public static final class TruckaJumpaState {
+        private int lives;
+        private int score;
+        private int level;
+        private int tickCounter;
+        private int jumpTicksLeft;
+        private boolean gameOver;
+        private boolean levelComplete;
+        private List<TruckaObstacle> obstacles;
+
+        public static TruckaJumpaState initial(final TruckaJumpaConfig config) {
+            TruckaJumpaState s = new TruckaJumpaState();
+            s.lives = config.getLives();
+            s.score = 0;
+            s.level = 1;
+            s.tickCounter = 0;
+            s.jumpTicksLeft = 0;
+            s.gameOver = false;
+            s.levelComplete = false;
+            s.obstacles = new ArrayList<>();
+            return s;
+        }
+
+        public int getLives() { return lives; }
+        public void setLives(final int lives) { this.lives = lives; }
+        public int getScore() { return score; }
+        public void addScore(final int n) { this.score += n; }
+        public void setScore(final int score) { this.score = score; }
+        public int getLevel() { return level; }
+        public void setLevel(final int level) { this.level = level; }
+        public int getTickCounter() { return tickCounter; }
+        public void setTickCounter(final int tickCounter) { this.tickCounter = tickCounter; }
+        public int getJumpTicksLeft() { return jumpTicksLeft; }
+        public void setJumpTicksLeft(final int jumpTicksLeft) { this.jumpTicksLeft = jumpTicksLeft; }
+        public boolean isGameOver() { return gameOver; }
+        public void setGameOver(final boolean gameOver) { this.gameOver = gameOver; }
+        public boolean isLevelComplete() { return levelComplete; }
+        public void setLevelComplete(final boolean levelComplete) { this.levelComplete = levelComplete; }
+        public List<TruckaObstacle> getObstacles() { return obstacles; }
+        public void setObstacles(final List<TruckaObstacle> obstacles) { this.obstacles = obstacles; }
+
+        public static TruckaJumpaState copyFrom(final TruckaJumpaState other) {
+            TruckaJumpaState s = new TruckaJumpaState();
+            s.lives = other.lives;
+            s.score = other.score;
+            s.level = other.level;
+            s.tickCounter = other.tickCounter;
+            s.jumpTicksLeft = other.jumpTicksLeft;
+            s.gameOver = other.gameOver;
+            s.levelComplete = other.levelComplete;
+            s.obstacles = new ArrayList<>();
+            for (TruckaObstacle ob : other.obstacles) {
+                s.obstacles.add(new TruckaObstacle(ob.getPosition(), ob.getWidth(), ob.getType()));
+            }
+            return s;
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Inner: TruckaObstacle
+    // -------------------------------------------------------------------------
+    public static final class TruckaObstacle {
+        private int position;
+        private final int width;
+        private final int type;
+
+        public TruckaObstacle(final int position, final int width, final int type) {
+            this.position = position;
+            this.width = width;
+            this.type = type;
+        }
+
+        public int getPosition() { return position; }
+        public void setPosition(final int position) { this.position = position; }
+        public int getWidth() { return width; }
+        public int getType() { return type; }
+    }
+
+    // -------------------------------------------------------------------------
+    // Snapshot for UI
+    // -------------------------------------------------------------------------
+    public static final class TruckaJumpaSnapshot {
+        private final int lives;
+        private final int score;
+        private final int level;
+        private final int jumpTicksLeft;
+        private final boolean gameOver;
+        private final List<ObstacleSnapshot> obstacles;
+
+        public TruckaJumpaSnapshot(
+            final int lives,
+            final int score,
+            final int level,
+            final int jumpTicksLeft,
+            final boolean gameOver,
+            final List<ObstacleSnapshot> obstacles
+        ) {
+            this.lives = lives;
