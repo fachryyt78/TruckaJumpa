@@ -592,3 +592,102 @@ public final class TruckaJumpa {
             case 1: return TRUCKA_ERR_ALREADY_JUMPING;
             case 2: return TRUCKA_EVT_JUMP;
             case 3: return TRUCKA_EVT_TICK;
+            case 4: return TRUCKA_EVT_CRASH;
+            case 5: return TRUCKA_EVT_GAME_OVER;
+            case 6: return TRUCKA_EVT_CLEARED;
+            case 7: return TRUCKA_EVT_LEVEL_UP;
+            default: return "";
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Validation
+    // -------------------------------------------------------------------------
+    public static boolean isValidConfig(final TruckaJumpaConfig config) {
+        if (config == null) return false;
+        if (config.getTrackLength() < 5 || config.getTrackLength() > 50) return false;
+        if (config.getTruckPosition() < 0 || config.getTruckPosition() >= config.getTrackLength()) return false;
+        if (config.getJumpDurationTicks() < 1 || config.getJumpDurationTicks() > 20) return false;
+        if (config.getLives() < 1 || config.getLives() > 10) return false;
+        return true;
+    }
+
+    public int getObstacleCount() { return state.getObstacles().size(); }
+
+    public TruckaJumpaState copyState() {
+        return TruckaJumpaState.copyFrom(state);
+    }
+
+    public void restoreState(final TruckaJumpaState s) {
+        if (s != null) state = TruckaJumpaState.copyFrom(s);
+    }
+
+    // -------------------------------------------------------------------------
+    // Replay input
+    // -------------------------------------------------------------------------
+    public static final class TruckaJumpInput {
+        private final int tick;
+        private final boolean jump;
+
+        public TruckaJumpInput(final int tick, final boolean jump) {
+            this.tick = tick;
+            this.jump = jump;
+        }
+
+        public int getTick() { return tick; }
+        public boolean isJump() { return jump; }
+    }
+
+    public static TruckaJumpaState runReplay(final TruckaJumpaConfig config, final long seed, final List<TruckaJumpInput> inputs, final int maxTicks) {
+        TruckaJumpa game = new TruckaJumpa(config, seed);
+        int tick = 0;
+        int inputIdx = 0;
+        while (tick < maxTicks && !game.getState().isGameOver()) {
+            while (inputIdx < inputs.size() && inputs.get(inputIdx).getTick() <= tick) {
+                if (inputs.get(inputIdx).isJump()) game.jump();
+                inputIdx++;
+            }
+            game.tick();
+            tick++;
+        }
+        return game.getState();
+    }
+
+    // -------------------------------------------------------------------------
+    // Runtime exception
+    // -------------------------------------------------------------------------
+    public static final class TruckaJumpaRuntimeException extends RuntimeException {
+        private final String errorCode;
+
+        public TruckaJumpaRuntimeException(final String errorCode) {
+            super(errorCode);
+            this.errorCode = errorCode;
+        }
+
+        public String getErrorCode() { return errorCode; }
+    }
+
+    // -------------------------------------------------------------------------
+    // Display / palette
+    // -------------------------------------------------------------------------
+    public static String getPaletteTruckHex() { return String.format("#%06x", PALETTE_TRUCK & 0xFFFFFF); }
+    public static String getPaletteBarrierHex() { return String.format("#%06x", PALETTE_BARRIER & 0xFFFFFF); }
+    public static String getPaletteTrackHex() { return String.format("#%06x", PALETTE_TRACK & 0xFFFFFF); }
+
+    public int getDisplayWidthPx() {
+        return config.getTrackLength() * DISPLAY_CELL_W;
+    }
+
+    public int getDisplayHeightPx() {
+        return DISPLAY_CELL_H * 2;
+    }
+
+    // -------------------------------------------------------------------------
+    // Lifecycle
+    // -------------------------------------------------------------------------
+    public boolean isActive() { return !state.isGameOver(); }
+    public boolean canMove() { return !state.isGameOver(); }
+    public int getRemainingLives() { return Math.max(0, state.getLives()); }
+
+    // -------------------------------------------------------------------------
+    // Sequel reference (Frogget / Frogga)
