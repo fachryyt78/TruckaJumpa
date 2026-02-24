@@ -1681,3 +1681,102 @@ public final class TruckaJumpa {
         return cfg != null ? cfg.getPointsLevelBonus() : POINTS_LEVEL_BONUS;
     }
 
+    public static int getObstacleSpawnIntervalFromConfig(final TruckaJumpaConfig cfg) {
+        return cfg != null ? cfg.getObstacleSpawnInterval() : OBSTACLE_SPAWN_INTERVAL;
+    }
+
+    public static int getMinObstacleWidthFromConfig(final TruckaJumpaConfig cfg) {
+        return cfg != null ? cfg.getMinObstacleWidth() : MIN_OBSTACLE_WIDTH;
+    }
+
+    public static int getMaxObstacleWidthFromConfig(final TruckaJumpaConfig cfg) {
+        return cfg != null ? cfg.getMaxObstacleWidth() : MAX_OBSTACLE_WIDTH;
+    }
+
+    public TruckaJumpaState getStateRef() { return state; }
+    public TruckaJumpaConfig getConfigRef() { return config; }
+    public void setStateRef(final TruckaJumpaState s) { if (s != null) state = s; }
+
+    public static boolean isObstacleTypeBarrier(final int type) { return type == OBSTACLE_TYPE_BARRIER; }
+    public static boolean isObstacleTypePit(final int type) { return type == OBSTACLE_TYPE_PIT; }
+    public int getObstacleTypeAt(final int index) {
+        TruckaObstacle ob = getObstacleByIndex(index);
+        return ob != null ? ob.getType() : -1;
+    }
+    public int getObstaclePositionByIndex(final int index) { return getObstaclePosition(index); }
+    public int getObstacleWidthByIndex(final int index) { return getObstacleWidth(index); }
+    public boolean isEmpty() { return isObstacleListEmpty(); }
+    public int size() { return getObstacleListSize(); }
+    public TruckaJumpaSnapshot snapshot() { return getSnapshot(); }
+    public void jumpWithStatsAndEvent() { jumpWithStats(); if (lastEventCode == EVT_JUMP) { eventLog.add(new TruckaJumpaEvent(lastEventCode, lastEventName, state.getTickCounter(), state.getJumpTicksLeft())); } }
+    public void tickWithStatsAndEvent() { tickWithStats(); eventLog.add(new TruckaJumpaEvent(lastEventCode, lastEventName, state.getTickCounter(), state.getJumpTicksLeft())); }
+    public static TruckaJumpa create() { return new TruckaJumpa(); }
+    public static TruckaJumpa createWithSeedOnly(final long seed) { return new TruckaJumpa(seed); }
+    public static TruckaJumpa createWithConfig(final TruckaJumpaConfig config) { return new TruckaJumpa(config, System.nanoTime()); }
+    public static TruckaJumpa createWithConfigAndSeed(final TruckaJumpaConfig config, final long seed) { return new TruckaJumpa(config, seed); }
+    public static TruckaJumpa createEasy() { return new TruckaJumpa(presetEasy(), 0L); }
+    public static TruckaJumpa createNormal() { return new TruckaJumpa(presetNormal(), 0L); }
+    public static TruckaJumpa createHard() { return new TruckaJumpa(presetHard(), 0L); }
+    public static TruckaJumpa createLongTrack() { return new TruckaJumpa(presetLongTrack(), 0L); }
+    public static TruckaJumpa createShortJump() { return new TruckaJumpa(presetShortJump(), 0L); }
+    public void performKeyActionWithStats(final String key) { if (actionFromKey(key) == KEY_JUMP) jumpWithStats(); }
+    public void performKeyActionWithEvent(final String key) { if (actionFromKey(key) == KEY_JUMP) jumpWithEventLog(); }
+    public void performKeyActionWithStatsAndEvent(final String key) { if (actionFromKey(key) == KEY_JUMP) jumpWithStatsAndEvent(); }
+    public int getEventLogSize() { return eventLog.size(); }
+    public TruckaJumpaEvent getEventAt(final int index) { if (index < 0 || index >= eventLog.size()) return null; return eventLog.get(index); }
+    public int getHighScoresSize() { return highScores.size(); }
+    public TruckaHighScoreEntry getHighScoreAt(final int index) { if (index < 0 || index >= highScores.size()) return null; return highScores.get(index); }
+    public int getSessionJumps() { return sessionJumps; }
+    public int getSessionCleared() { return sessionCleared; }
+    public int getSessionCrashes() { return sessionCrashes; }
+    public void incrementSessionJumps() { sessionJumps++; }
+    public void incrementSessionCleared() { sessionCleared++; }
+    public void incrementSessionCrashes() { sessionCrashes++; }
+    public static String getErrBoundsStatic() { return TRUCKA_ERR_BOUNDS; }
+    public static String getErrCrashStatic() { return TRUCKA_ERR_CRASH; }
+    public static String getErrNoLivesStatic() { return TRUCKA_ERR_NO_LIVES; }
+    public static String getErrGameOverStatic() { return TRUCKA_ERR_GAME_OVER; }
+    public static String getErrAlreadyJumpingStatic() { return TRUCKA_ERR_ALREADY_JUMPING; }
+    public static String getEvtJumpStatic() { return TRUCKA_EVT_JUMP; }
+    public static String getEvtClearedStatic() { return TRUCKA_EVT_CLEARED; }
+    public static String getEvtCrashStatic() { return TRUCKA_EVT_CRASH; }
+    public static String getEvtLevelUpStatic() { return TRUCKA_EVT_LEVEL_UP; }
+    public static String getEvtGameOverStatic() { return TRUCKA_EVT_GAME_OVER; }
+    public static String getEvtTickStatic() { return TRUCKA_EVT_TICK; }
+    public String getContractIdShort() { return formatContractIdShort(); }
+    public String getFingerprint() { return getContractFingerprint(); }
+    public String getInfo() { return getContractInfo(); }
+    public String getSequel() { return getSequelInfo(); }
+    public String getUniverse() { return getUniverseName(); }
+    public boolean getIsSequel() { return isSequelToFrogget(); }
+    public int getFlags() { return getStateFlags(); }
+    public boolean getHasJumpReady() { return hasJumpReadyFlag(); }
+    public boolean getHasGameOver() { return hasGameOverFlag(); }
+    public boolean getHasLevelComplete() { return hasLevelCompleteFlag(); }
+    public boolean getHasTruckInAir() { return hasTruckInAirFlag(); }
+    public float getJumpProgressPct() { return getJumpProgress() * 100f; }
+    public int getAirTimeRemainingTicks() { return getAirTimeRemaining(); }
+    public boolean getIsJumpAllowedNow() { return isJumpAllowed(); }
+    public int getTotalWidth() { return getTotalObstacleWidth(); }
+    public int getLeftmostPos() { return getLeftmostObstaclePosition(); }
+    public int getRightmostEnd() { return getRightmostObstacleEndPosition(); }
+    public int getFirstObstaclePos() { return getFirstObstaclePosition(); }
+    public int getLastObstacleEnd() { return getLastObstacleEndPosition(); }
+    public int getClosestObstacle() { return getClosestObstaclePosition(); }
+    public int getTicksUntilObstacle() { return getTicksUntilNextObstacleAtTruck(); }
+    public int getSafeJumpTicks() { return getSafeJumpTicksBeforeCollision(); }
+    public boolean getWouldClear() { return wouldJumpClearNextObstacle(); }
+    public int getRecommendedTick() { return getRecommendedJumpTick(); }
+    public int getClearedEstimate() { return getClearedCountEstimate(); }
+    public int getScoreNextBonus() { return getScoreToNextBonus(); }
+    public boolean getEligibleBonus() { return isEligibleForLevelBonus(); }
+    public boolean getIsEmpty() { return isObstacleListEmpty(); }
+    public int getObsCount() { return getObstacleListSize(); }
+    public TruckaObstacle getObs(final int index) { return getObstacleByIndex(index); }
+    public int getObsPos(final int index) { return getObstaclePosition(index); }
+    public int getObsWidth(final int index) { return getObstacleWidth(index); }
+    public TruckaCellType getCell(final int pos) { return getCellType(pos); }
+    public boolean isTruck(final int pos) { return isTruckAt(pos); }
+    public boolean isObstacle(final int pos) { return hasObstacleAt(pos); }
+    public String getGrid() { return toRetroGridString(); }
+    public String getCompact() { return toCompactState(); }
