@@ -196,3 +196,102 @@ public final class TruckaJumpa {
                 lastEventCode = 6;
             }
         }
+    }
+
+    private boolean checkCollision() {
+        int truckPos = config.getTruckPosition();
+        for (TruckaObstacle ob : state.getObstacles()) {
+            if (ob.getPosition() <= truckPos && ob.getPosition() + ob.getWidth() > truckPos) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void spawnObstacle() {
+        int width = config.getMinObstacleWidth() + rng.nextInt(config.getMaxObstacleWidth() - config.getMinObstacleWidth() + 1);
+        int pos = config.getTrackLength() - 1;
+        TruckaObstacle ob = new TruckaObstacle(pos, width, OBSTACLE_TYPE_BARRIER);
+        state.getObstacles().add(ob);
+    }
+
+    public void advanceLevelIfComplete() {
+        if (state.isLevelComplete() && !state.isGameOver()) {
+            state.setLevel(state.getLevel() + 1);
+            state.setLevelComplete(false);
+            state.addScore(config.getPointsLevelBonus());
+            state.getObstacles().clear();
+            lastEventName = TRUCKA_EVT_LEVEL_UP;
+            lastEventCode = 7;
+        }
+    }
+
+    public void setLevelComplete(final boolean complete) {
+        state.setLevelComplete(complete);
+    }
+
+    public boolean canJump() {
+        return !state.isGameOver() && state.getJumpTicksLeft() == 0;
+    }
+
+    public boolean isJumping() {
+        return state.getJumpTicksLeft() > 0;
+    }
+
+    // -------------------------------------------------------------------------
+    // Inner: TruckaJumpaConfig (immutable)
+    // -------------------------------------------------------------------------
+    public static final class TruckaJumpaConfig {
+        private final int trackLength;
+        private final int truckPosition;
+        private final int jumpDurationTicks;
+        private final int lives;
+        private final int obstacleBaseSpeed;
+        private final int maxLevel;
+        private final int pointsPerObstacle;
+        private final int pointsLevelBonus;
+        private final int obstacleSpawnInterval;
+        private final int minObstacleWidth;
+        private final int maxObstacleWidth;
+
+        public TruckaJumpaConfig(
+            final int trackLength,
+            final int truckPosition,
+            final int jumpDurationTicks,
+            final int lives,
+            final int obstacleBaseSpeed,
+            final int maxLevel,
+            final int pointsPerObstacle,
+            final int pointsLevelBonus,
+            final int obstacleSpawnInterval,
+            final int minObstacleWidth,
+            final int maxObstacleWidth
+        ) {
+            this.trackLength = trackLength;
+            this.truckPosition = truckPosition;
+            this.jumpDurationTicks = jumpDurationTicks;
+            this.lives = lives;
+            this.obstacleBaseSpeed = obstacleBaseSpeed;
+            this.maxLevel = maxLevel;
+            this.pointsPerObstacle = pointsPerObstacle;
+            this.pointsLevelBonus = pointsLevelBonus;
+            this.obstacleSpawnInterval = obstacleSpawnInterval;
+            this.minObstacleWidth = minObstacleWidth;
+            this.maxObstacleWidth = maxObstacleWidth;
+        }
+
+        public int getTrackLength() { return trackLength; }
+        public int getTruckPosition() { return truckPosition; }
+        public int getJumpDurationTicks() { return jumpDurationTicks; }
+        public int getLives() { return lives; }
+        public int getObstacleBaseSpeed() { return obstacleBaseSpeed; }
+        public int getMaxLevel() { return maxLevel; }
+        public int getPointsPerObstacle() { return pointsPerObstacle; }
+        public int getPointsLevelBonus() { return pointsLevelBonus; }
+        public int getObstacleSpawnInterval() { return obstacleSpawnInterval; }
+        public int getMinObstacleWidth() { return minObstacleWidth; }
+        public int getMaxObstacleWidth() { return maxObstacleWidth; }
+    }
+
+    // -------------------------------------------------------------------------
+    // Inner: TruckaJumpaState
