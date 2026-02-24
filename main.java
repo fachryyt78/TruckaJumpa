@@ -1582,3 +1582,102 @@ public final class TruckaJumpa {
     public int getDisplayWidthPxForDisplay() { return getDisplayWidthPx(); }
     public int getDisplayHeightPxForDisplay() { return getDisplayHeightPx(); }
     public String getPaletteTruckHexForDisplay() { return getPaletteTruckHex(); }
+    public String getPaletteBarrierHexForDisplay() { return getPaletteBarrierHex(); }
+    public String getPaletteTrackHexForDisplay() { return getPaletteTrackHex(); }
+    public int getTruckAnimationFrameForDisplay() { return getTruckAnimationFrame(); }
+    public TruckaJumpaSnapshot getSnapshotForDisplay() { return getSnapshot(); }
+    public TruckaJumpaStats getSessionStatsForDisplay() { return getSessionStats(); }
+    public List<TruckaHighScoreEntry> getHighScoresForDisplay() { return getHighScores(); }
+    public List<ObstacleSnapshot> getObstaclesSnapshotForDisplay() { return getObstaclesSnapshot(); }
+    public String toRetroGridStringForDisplay() { return toRetroGridString(); }
+    public String toCompactStateForDisplay() { return toCompactState(); }
+    public String getStateDigestForDisplay() { return getStateDigest(); }
+    public String encodeStateForDisplay() { return encodeState(); }
+    public long getStateChecksumForDisplay() { return getStateChecksum(); }
+    public int getMaxPossibleScoreApproxForDisplay() { return getMaxPossibleScoreApprox(); }
+    public int getRecommendedJumpTickForDisplay() { return getRecommendedJumpTick(); }
+    public int getSafeJumpTicksBeforeCollisionForDisplay() { return getSafeJumpTicksBeforeCollision(); }
+    public boolean getWouldJumpClearNextObstacleForDisplay() { return wouldJumpClearNextObstacle(); }
+    public int getViewportStartForDisplay(final int offset) { return getViewportStart(offset); }
+    public int getVisibleObstacleCountForDisplay(final int viewportStart) { return getVisibleObstacleCount(viewportStart); }
+    public int getSpawnIntervalForLevelForDisplay() { return getSpawnIntervalForLevel(); }
+    public boolean getShouldLevelCompleteForDisplay() { return shouldLevelComplete(); }
+    public boolean getIsDefaultConfigForDisplay() { return isDefaultConfig(); }
+    public boolean getIsContractIdForDisplay(final String id) { return isContractId(id); }
+    public boolean getIsVersionHashForDisplay(final String hash) { return isVersionHash(hash); }
+    public boolean getIsSequelToFroggetForDisplay() { return isSequelToFrogget(); }
+    public String getUniverseNameForDisplay() { return getUniverseName(); }
+    public boolean getValidateEncodedStateForDisplay(final String encoded) { return validateEncodedState(encoded); }
+    public int getScoreFromEncodedForDisplay(final String encoded) { return getScoreFromEncoded(encoded); }
+    public String getLevelDescriptionForDisplay(final int level) { return getLevelDescription(level); }
+    public String getLevelDescriptionForUIForDisplay(final int level) { return getLevelDescriptionForUI(level); }
+    public int getActionFromKeyForDisplay(final String key) { return actionFromKey(key); }
+    public int getClampLevelForDisplay(final int level) { return clampLevel(level, config); }
+    public int getClampScoreForDisplay(final int score) { return clampScore(score); }
+    public int getClampTrackPositionForDisplay(final int pos) { return clampTrackPosition(pos, config); }
+    public int getClampObstacleWidthForDisplay(final int width) { return clampObstacleWidth(width, config); }
+    public boolean getIsValidConfigForDisplay() { return isValidConfig(config); }
+    public boolean getStateEqualsForDisplay(final TruckaJumpa other) { return stateEquals(other); }
+    public int getObstacleCountInRangeForDisplay(final int from, final int to) { return getObstacleCountInRange(from, to); }
+    public boolean getHasObstacleInRangeForDisplay(final int from, final int to) { return hasObstacleInRange(from, to); }
+    public int getObstacleAtPositionForDisplay(final int pos) { return getObstacleAtPosition(pos); }
+    public int getObstaclePositionForDisplay(final int index) { return getObstaclePosition(index); }
+    public int getObstacleWidthForDisplay(final int index) { return getObstacleWidth(index); }
+    public TruckaCellType getCellTypeForDisplay(final int position) { return getCellType(position); }
+    public boolean getIsTruckAtForDisplay(final int position) { return isTruckAt(position); }
+    public boolean getHasObstacleAtForDisplay(final int position) { return hasObstacleAt(position); }
+    public int getClearedCountEstimateForDisplay() { return getClearedCountEstimate(); }
+    public int getScoreToNextBonusForDisplay() { return getScoreToNextBonus(); }
+    public boolean getIsHighScoreEligibleForDisplay(final int minScore) { return isHighScoreEligible(minScore); }
+    public float getJumpProgressForDisplayFloat() { return getJumpProgress(); }
+    public int getStateFlagsValue() { return getStateFlags(); }
+    public String getContractFingerprintForDisplay() { return getContractFingerprint(); }
+    public String getContractInfoForDisplay() { return getContractInfo(); }
+
+    public static final int TRUCKA_VERSION_MAJOR = 1;
+    public static final int TRUCKA_VERSION_MINOR = 0;
+    public static final String TRUCKA_VERSION_STRING = "1.0";
+    public static String getVersionString() { return TRUCKA_VERSION_STRING; }
+    public static int getVersionMajor() { return TRUCKA_VERSION_MAJOR; }
+    public static int getVersionMinor() { return TRUCKA_VERSION_MINOR; }
+
+    public int getObstacleSpeedAtLevel(final int level) {
+        return config.getObstacleBaseSpeed() + (level / 2);
+    }
+
+    public int getPointsPerClearAtLevel(final int level) {
+        return config.getPointsPerObstacle() + level * 5;
+    }
+
+    public static int getTrackLengthFromConfig(final TruckaJumpaConfig cfg) {
+        return cfg != null ? cfg.getTrackLength() : TRACK_LENGTH;
+    }
+
+    public static int getTruckPositionFromConfig(final TruckaJumpaConfig cfg) {
+        return cfg != null ? cfg.getTruckPosition() : TRUCK_POSITION;
+    }
+
+    public static int getJumpDurationFromConfig(final TruckaJumpaConfig cfg) {
+        return cfg != null ? cfg.getJumpDurationTicks() : JUMP_DURATION_TICKS;
+    }
+
+    public static int getLivesFromConfig(final TruckaJumpaConfig cfg) {
+        return cfg != null ? cfg.getLives() : INITIAL_LIVES;
+    }
+
+    public static int getObstacleBaseSpeedFromConfig(final TruckaJumpaConfig cfg) {
+        return cfg != null ? cfg.getObstacleBaseSpeed() : OBSTACLE_BASE_SPEED;
+    }
+
+    public static int getMaxLevelFromConfig(final TruckaJumpaConfig cfg) {
+        return cfg != null ? cfg.getMaxLevel() : MAX_LEVEL;
+    }
+
+    public static int getPointsPerObstacleFromConfig(final TruckaJumpaConfig cfg) {
+        return cfg != null ? cfg.getPointsPerObstacle() : POINTS_PER_OBSTACLE;
+    }
+
+    public static int getPointsLevelBonusFromConfig(final TruckaJumpaConfig cfg) {
+        return cfg != null ? cfg.getPointsLevelBonus() : POINTS_LEVEL_BONUS;
+    }
+
