@@ -889,3 +889,102 @@ public final class TruckaJumpa {
     // -------------------------------------------------------------------------
     // Cell type for rendering (track position -> cell content)
     // -------------------------------------------------------------------------
+    public enum TruckaCellType { EMPTY, TRUCK, OBSTACLE }
+
+    public TruckaCellType getCellType(final int position) {
+        if (position == config.getTruckPosition()) return TruckaCellType.TRUCK;
+        for (TruckaObstacle ob : state.getObstacles()) {
+            if (position >= ob.getPosition() && position < ob.getPosition() + ob.getWidth()) return TruckaCellType.OBSTACLE;
+        }
+        return TruckaCellType.EMPTY;
+    }
+
+    public boolean isTruckAt(final int position) {
+        return position == config.getTruckPosition();
+    }
+
+    public boolean hasObstacleAt(final int position) {
+        for (TruckaObstacle ob : state.getObstacles()) {
+            if (position >= ob.getPosition() && position < ob.getPosition() + ob.getWidth()) return true;
+        }
+        return false;
+    }
+
+    public String toRetroGridString() {
+        StringBuilder sb = new StringBuilder();
+        for (int p = 0; p < config.getTrackLength(); p++) {
+            TruckaCellType t = getCellType(p);
+            if (t == TruckaCellType.TRUCK) sb.append('T');
+            else if (t == TruckaCellType.OBSTACLE) sb.append('#');
+            else sb.append('.');
+        }
+        return sb.toString();
+    }
+
+    // -------------------------------------------------------------------------
+    // Key binding (for web UI)
+    // -------------------------------------------------------------------------
+    public static final int KEY_JUMP = 1;
+    public static final int KEY_NONE = 0;
+
+    public static int actionFromKey(final String key) {
+        if (key == null) return KEY_NONE;
+        switch (key.toLowerCase()) {
+            case " ":
+            case "space":
+            case "arrowup":
+            case "keyw":
+            case "up":
+            case "w": return KEY_JUMP;
+            default: return KEY_NONE;
+        }
+    }
+
+    public void performKeyAction(final String key) {
+        if (actionFromKey(key) == KEY_JUMP) jump();
+    }
+
+    // -------------------------------------------------------------------------
+    // Clamp helpers
+    // -------------------------------------------------------------------------
+    public static int clampLevel(final int level, final TruckaJumpaConfig config) {
+        if (config == null) return Math.max(1, Math.min(level, MAX_LEVEL));
+        return Math.max(1, Math.min(level, config.getMaxLevel()));
+    }
+
+    public static int clampScore(final int score) {
+        return Math.max(0, score);
+    }
+
+    public int getMaxPossibleScoreApprox() {
+        return config.getMaxLevel() * (config.getPointsPerObstacle() * 20 + config.getPointsLevelBonus());
+    }
+
+    // -------------------------------------------------------------------------
+    // Copy state and restore
+    // -------------------------------------------------------------------------
+    public void copyStateTo(final TruckaJumpaState target) {
+        if (target == null) return;
+        target.setLives(state.getLives());
+        target.setScore(state.getScore());
+        target.setLevel(state.getLevel());
+        target.setTickCounter(state.getTickCounter());
+        target.setJumpTicksLeft(state.getJumpTicksLeft());
+        target.setGameOver(state.isGameOver());
+        target.setLevelComplete(state.isLevelComplete());
+        target.setObstacles(new ArrayList<>());
+        for (TruckaObstacle ob : state.getObstacles()) {
+            target.getObstacles().add(new TruckaObstacle(ob.getPosition(), ob.getWidth(), ob.getType()));
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Start new game with reset session
+    // -------------------------------------------------------------------------
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TruckaJumpa that = (TruckaJumpa) o;
+        return Objects.equals(config, that.config) && state.getScore() == that.getState().getScore()
+            && state.getLevel() == that.getState().getLevel() && state.getLives() == that.getState().getLives();
