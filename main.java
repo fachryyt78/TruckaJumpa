@@ -97,3 +97,102 @@ public final class TruckaJumpa {
     }
 
     public TruckaJumpa(final long seed) {
+        this.rng = new Random(seed);
+        this.config = new TruckaJumpaConfig(
+            TRACK_LENGTH,
+            TRUCK_POSITION,
+            JUMP_DURATION_TICKS,
+            INITIAL_LIVES,
+            OBSTACLE_BASE_SPEED,
+            MAX_LEVEL,
+            POINTS_PER_OBSTACLE,
+            POINTS_LEVEL_BONUS,
+            OBSTACLE_SPAWN_INTERVAL,
+            MIN_OBSTACLE_WIDTH,
+            MAX_OBSTACLE_WIDTH
+        );
+        this.state = TruckaJumpaState.initial(config);
+        this.lastEventCode = 0;
+        this.lastEventName = "";
+    }
+
+    public TruckaJumpa(final TruckaJumpaConfig config, final long seed) {
+        this.rng = new Random(seed);
+        this.config = config;
+        this.state = TruckaJumpaState.initial(config);
+        this.lastEventCode = 0;
+        this.lastEventName = "";
+    }
+
+    public TruckaJumpaConfig getConfig() { return config; }
+    public TruckaJumpaState getState() { return state; }
+    public int getLastEventCode() { return lastEventCode; }
+    public String getLastEventName() { return lastEventName; }
+
+    public void startNewGame() {
+        state = TruckaJumpaState.initial(config);
+        lastEventCode = 0;
+        lastEventName = "";
+        resetSessionStats();
+    }
+
+    /** Call when player presses jump. Starts jump if not already in air. */
+    public void jump() {
+        if (state.isGameOver()) {
+            lastEventName = TRUCKA_ERR_GAME_OVER;
+            lastEventCode = -1;
+            return;
+        }
+        if (state.getJumpTicksLeft() > 0) {
+            lastEventName = TRUCKA_ERR_ALREADY_JUMPING;
+            lastEventCode = 1;
+            return;
+        }
+        state.setJumpTicksLeft(config.getJumpDurationTicks());
+        lastEventName = TRUCKA_EVT_JUMP;
+        lastEventCode = 2;
+    }
+
+    public void tick() {
+        if (state.isGameOver()) return;
+        state.setTickCounter(state.getTickCounter() + 1);
+        if (state.getJumpTicksLeft() > 0) {
+            state.setJumpTicksLeft(state.getJumpTicksLeft() - 1);
+            lastEventName = TRUCKA_EVT_TICK;
+            lastEventCode = 3;
+        }
+        moveObstacles();
+        checkClearedObstacles();
+        if (state.getJumpTicksLeft() == 0 && checkCollision()) {
+            state.setLives(state.getLives() - 1);
+            lastEventName = TRUCKA_EVT_CRASH;
+            lastEventCode = 4;
+            if (state.getLives() <= 0) {
+                state.setGameOver(true);
+                lastEventName = TRUCKA_EVT_GAME_OVER;
+                lastEventCode = 5;
+            }
+        }
+        if (state.getTickCounter() % config.getObstacleSpawnInterval() == 0 && state.getTickCounter() > 0) {
+            spawnObstacle();
+        }
+    }
+
+    private void moveObstacles() {
+        int speed = config.getObstacleBaseSpeed() + (state.getLevel() / 2);
+        for (TruckaObstacle ob : state.getObstacles()) {
+            ob.setPosition(ob.getPosition() - speed);
+        }
+        state.getObstacles().removeIf(ob -> ob.getPosition() + ob.getWidth() < config.getTruckPosition());
+    }
+
+    private void checkClearedObstacles() {
+        int truckPos = config.getTruckPosition();
+        for (TruckaObstacle ob : new ArrayList<>(state.getObstacles())) {
+            if (ob.getPosition() + ob.getWidth() < truckPos) {
+                state.addScore(config.getPointsPerObstacle() + state.getLevel() * 5);
+                state.getObstacles().remove(ob);
+                lastEventName = TRUCKA_EVT_CLEARED;
+                lastEventCode = 6;
+            }
+        }
