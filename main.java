@@ -691,3 +691,102 @@ public final class TruckaJumpa {
 
     // -------------------------------------------------------------------------
     // Sequel reference (Frogget / Frogga)
+    // -------------------------------------------------------------------------
+    public static final String FROGGA_SEQUEL_ID = "Frogget";
+    public static final String TRUCKA_SEQUEL_LABEL = "TruckaJumpa";
+
+    public static String getSequelInfo() {
+        return TRUCKA_SEQUEL_LABEL + " follows " + FROGGA_SEQUEL_ID + ". Same universe, truck jump mechanics.";
+    }
+
+    // -------------------------------------------------------------------------
+    // Session stats
+    // -------------------------------------------------------------------------
+    public static final class TruckaJumpaStats {
+        private final int totalJumps;
+        private final int totalCleared;
+        private final int totalCrashes;
+        private final int peakLevel;
+        private final int peakScore;
+
+        public TruckaJumpaStats(final int totalJumps, final int totalCleared, final int totalCrashes, final int peakLevel, final int peakScore) {
+            this.totalJumps = totalJumps;
+            this.totalCleared = totalCleared;
+            this.totalCrashes = totalCrashes;
+            this.peakLevel = peakLevel;
+            this.peakScore = peakScore;
+        }
+
+        public int getTotalJumps() { return totalJumps; }
+        public int getTotalCleared() { return totalCleared; }
+        public int getTotalCrashes() { return totalCrashes; }
+        public int getPeakLevel() { return peakLevel; }
+        public int getPeakScore() { return peakScore; }
+    }
+
+    private int sessionJumps;
+    private int sessionCleared;
+    private int sessionCrashes;
+
+    public void resetSessionStats() {
+        sessionJumps = 0;
+        sessionCleared = 0;
+        sessionCrashes = 0;
+    }
+
+    public TruckaJumpaStats getSessionStats() {
+        return new TruckaJumpaStats(sessionJumps, sessionCleared, sessionCrashes, state.getLevel(), state.getScore());
+    }
+
+    public void jumpWithStats() {
+        jump();
+        if (lastEventCode == 2) sessionJumps++;
+    }
+
+    public void tickWithStats() {
+        int livesBefore = state.getLives();
+        tick();
+        if (state.getLives() < livesBefore) sessionCrashes++;
+        if (lastEventCode == EVT_CLEARED) sessionCleared++;
+    }
+
+    // -------------------------------------------------------------------------
+    // Event log
+    // -------------------------------------------------------------------------
+    public static final class TruckaJumpaEvent {
+        private final int code;
+        private final String name;
+        private final int tick;
+        private final int jumpTicksLeft;
+
+        public TruckaJumpaEvent(final int code, final String name, final int tick, final int jumpTicksLeft) {
+            this.code = code;
+            this.name = name;
+            this.tick = tick;
+            this.jumpTicksLeft = jumpTicksLeft;
+        }
+
+        public int getCode() { return code; }
+        public String getName() { return name; }
+        public int getTick() { return tick; }
+        public int getJumpTicksLeft() { return jumpTicksLeft; }
+    }
+
+    private final List<TruckaJumpaEvent> eventLog = new ArrayList<>();
+
+    public List<TruckaJumpaEvent> getEventLog() { return Collections.unmodifiableList(eventLog); }
+    public void clearEventLog() { eventLog.clear(); }
+
+    public void jumpWithEventLog() {
+        jump();
+        eventLog.add(new TruckaJumpaEvent(lastEventCode, lastEventName, state.getTickCounter(), state.getJumpTicksLeft()));
+    }
+
+    public void tickWithEventLog() {
+        tick();
+        eventLog.add(new TruckaJumpaEvent(lastEventCode, lastEventName, state.getTickCounter(), state.getJumpTicksLeft()));
+    }
+
+    // -------------------------------------------------------------------------
+    // Level description
+    // -------------------------------------------------------------------------
