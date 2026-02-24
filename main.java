@@ -1384,3 +1384,102 @@ public final class TruckaJumpa {
     public static int getSoundJump() { return SOUND_JUMP; }
     public static int getSoundCrash() { return SOUND_CRASH; }
     public static int getSoundClear() { return SOUND_CLEAR; }
+    public static int getSoundLevel() { return SOUND_LEVEL; }
+    public static String getFroggaSequelId() { return FROGGA_SEQUEL_ID; }
+    public static String getTruckaSequelLabel() { return TRUCKA_SEQUEL_LABEL; }
+    public static int getFroggetTrackCols() { return FROGGET_TRACK_COLS; }
+    public static int getTruckaTrackLengthDefault() { return TRUCKA_TRACK_LENGTH_DEFAULT; }
+    public static int getViewportOffsetMax() { return VIEWPORT_OFFSET_MAX; }
+
+    public float getJumpProgress() {
+        if (config.getJumpDurationTicks() <= 0) return 1.0f;
+        int left = state.getJumpTicksLeft();
+        if (left <= 0) return 1.0f;
+        return 1.0f - (float) left / config.getJumpDurationTicks();
+    }
+
+    public int getScoreForNextLevel() {
+        return state.getLevel() * config.getPointsLevelBonus();
+    }
+
+    public boolean isHighScoreEligible(final int minScore) {
+        return state.isGameOver() && state.getScore() >= minScore;
+    }
+
+    public static TruckaJumpa createWithSeed(final long seed) {
+        return new TruckaJumpa(seed);
+    }
+
+    public static TruckaJumpa createWithConfigAndSeed(final TruckaJumpaConfig config, final long seed) {
+        return new TruckaJumpa(config, seed);
+    }
+
+    public TruckaJumpaConfig getConfigCopy() {
+        return new TruckaJumpaConfig(
+            config.getTrackLength(),
+            config.getTruckPosition(),
+            config.getJumpDurationTicks(),
+            config.getLives(),
+            config.getObstacleBaseSpeed(),
+            config.getMaxLevel(),
+            config.getPointsPerObstacle(),
+            config.getPointsLevelBonus(),
+            config.getObstacleSpawnInterval(),
+            config.getMinObstacleWidth(),
+            config.getMaxObstacleWidth()
+        );
+    }
+
+    public int getConfigTrackLengthInternal() { return config.getTrackLength(); }
+    public int getConfigTruckPositionInternal() { return config.getTruckPosition(); }
+    public int getConfigJumpDurationTicksInternal() { return config.getJumpDurationTicks(); }
+    public int getConfigLivesInternal() { return config.getLives(); }
+    public int getConfigObstacleBaseSpeedInternal() { return config.getObstacleBaseSpeed(); }
+    public int getConfigMaxLevelInternal() { return config.getMaxLevel(); }
+    public int getConfigPointsPerObstacleInternal() { return config.getPointsPerObstacle(); }
+    public int getConfigPointsLevelBonusInternal() { return config.getPointsLevelBonus(); }
+    public int getConfigObstacleSpawnIntervalInternal() { return config.getObstacleSpawnInterval(); }
+    public int getConfigMinObstacleWidthInternal() { return config.getMinObstacleWidth(); }
+    public int getConfigMaxObstacleWidthInternal() { return config.getMaxObstacleWidth(); }
+
+    public static String getContractIdStatic() { return TRUCKA_CONTRACT_ID; }
+    public static String getVersionHashStatic() { return TRUCKA_VERSION_HASH; }
+    public static String getDomainSeedStatic() { return TRUCKA_DOMAIN_SEED; }
+    public String getContractIdInstance() { return TRUCKA_CONTRACT_ID; }
+    public String getVersionHashInstance() { return TRUCKA_VERSION_HASH; }
+    public String getDomainSeedInstance() { return TRUCKA_DOMAIN_SEED; }
+
+    public int getLastEventCodeValue() { return lastEventCode; }
+    public String getLastEventNameValue() { return lastEventName; }
+    public void clearLastEvent() { lastEventCode = 0; lastEventName = ""; }
+
+    public Random getRng() { return rng; }
+
+    public boolean isObstacleListEmpty() { return state.getObstacles().isEmpty(); }
+    public int getObstacleListSize() { return state.getObstacles().size(); }
+    public TruckaObstacle getObstacleByIndex(final int index) {
+        if (index < 0 || index >= state.getObstacles().size()) return null;
+        return state.getObstacles().get(index);
+    }
+
+    public int getFirstObstaclePosition() {
+        if (state.getObstacles().isEmpty()) return -1;
+        int min = config.getTrackLength();
+        for (TruckaObstacle ob : state.getObstacles()) {
+            if (ob.getPosition() < min) min = ob.getPosition();
+        }
+        return min;
+    }
+
+    public int getLastObstacleEndPosition() {
+        if (state.getObstacles().isEmpty()) return -1;
+        int max = -1;
+        for (TruckaObstacle ob : state.getObstacles()) {
+            int end = ob.getPosition() + ob.getWidth();
+            if (end > max) max = end;
+        }
+        return max;
+    }
+
+    public static int clampTrackPosition(final int pos, final TruckaJumpaConfig config) {
+        if (config == null) return Math.max(0, Math.min(pos, TRACK_LENGTH - 1));
