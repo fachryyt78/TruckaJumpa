@@ -493,3 +493,102 @@ public final class TruckaJumpa {
         String[] parts = encoded.split("\\|")[0].split(",");
         return parts.length >= 2 ? Integer.parseInt(parts[1]) : 0;
     }
+
+    // -------------------------------------------------------------------------
+    // Contract identity
+    // -------------------------------------------------------------------------
+    public static String getContractId() { return TRUCKA_CONTRACT_ID; }
+    public static String getVersionHash() { return TRUCKA_VERSION_HASH; }
+    public static String getDomainSeed() { return TRUCKA_DOMAIN_SEED; }
+    public static int getChainId() { return TRUCKA_CHAIN_ID; }
+    public static long getGenesisTs() { return TRUCKA_GENESIS_TS; }
+
+    public static String getContractFingerprint() {
+        return TRUCKA_CONTRACT_ID + "-" + TRUCKA_VERSION_HASH + "-" + TRUCKA_CHAIN_ID;
+    }
+
+    public static String formatContractIdShort() {
+        if (TRUCKA_CONTRACT_ID == null || TRUCKA_CONTRACT_ID.length() < 12) return TRUCKA_CONTRACT_ID;
+        return TRUCKA_CONTRACT_ID.substring(0, 10) + "..." + TRUCKA_CONTRACT_ID.substring(TRUCKA_CONTRACT_ID.length() - 8);
+    }
+
+    // -------------------------------------------------------------------------
+    // Builder
+    // -------------------------------------------------------------------------
+    public static final class TruckaJumpaBuilder {
+        private int trackLength = TRACK_LENGTH;
+        private int truckPosition = TRUCK_POSITION;
+        private int jumpDurationTicks = JUMP_DURATION_TICKS;
+        private int lives = INITIAL_LIVES;
+        private int obstacleBaseSpeed = OBSTACLE_BASE_SPEED;
+        private int maxLevel = MAX_LEVEL;
+        private int pointsPerObstacle = POINTS_PER_OBSTACLE;
+        private int pointsLevelBonus = POINTS_LEVEL_BONUS;
+        private int obstacleSpawnInterval = OBSTACLE_SPAWN_INTERVAL;
+        private int minObstacleWidth = MIN_OBSTACLE_WIDTH;
+        private int maxObstacleWidth = MAX_OBSTACLE_WIDTH;
+        private Long seed = null;
+
+        public TruckaJumpaBuilder trackLength(final int n) { this.trackLength = n; return this; }
+        public TruckaJumpaBuilder truckPosition(final int n) { this.truckPosition = n; return this; }
+        public TruckaJumpaBuilder jumpDurationTicks(final int n) { this.jumpDurationTicks = n; return this; }
+        public TruckaJumpaBuilder lives(final int n) { this.lives = n; return this; }
+        public TruckaJumpaBuilder obstacleBaseSpeed(final int n) { this.obstacleBaseSpeed = n; return this; }
+        public TruckaJumpaBuilder maxLevel(final int n) { this.maxLevel = n; return this; }
+        public TruckaJumpaBuilder pointsPerObstacle(final int n) { this.pointsPerObstacle = n; return this; }
+        public TruckaJumpaBuilder pointsLevelBonus(final int n) { this.pointsLevelBonus = n; return this; }
+        public TruckaJumpaBuilder obstacleSpawnInterval(final int n) { this.obstacleSpawnInterval = n; return this; }
+        public TruckaJumpaBuilder minObstacleWidth(final int n) { this.minObstacleWidth = n; return this; }
+        public TruckaJumpaBuilder maxObstacleWidth(final int n) { this.maxObstacleWidth = n; return this; }
+        public TruckaJumpaBuilder seed(final long s) { this.seed = s; return this; }
+
+        public TruckaJumpa build() {
+            TruckaJumpaConfig cfg = new TruckaJumpaConfig(
+                trackLength, truckPosition, jumpDurationTicks, lives, obstacleBaseSpeed,
+                maxLevel, pointsPerObstacle, pointsLevelBonus, obstacleSpawnInterval,
+                minObstacleWidth, maxObstacleWidth
+            );
+            long s = seed != null ? seed : System.nanoTime();
+            return new TruckaJumpa(cfg, s);
+        }
+    }
+
+    public static TruckaJumpaBuilder builder() { return new TruckaJumpaBuilder(); }
+
+    // -------------------------------------------------------------------------
+    // Presets
+    // -------------------------------------------------------------------------
+    public static TruckaJumpaConfig presetEasy() {
+        return new TruckaJumpaConfig(20, 0, 8, 5, 1, 50, 100, 80, 10, 1, 2);
+    }
+
+    public static TruckaJumpaConfig presetNormal() {
+        return new TruckaJumpaConfig(
+            TRACK_LENGTH, TRUCK_POSITION, JUMP_DURATION_TICKS, INITIAL_LIVES,
+            OBSTACLE_BASE_SPEED, MAX_LEVEL, POINTS_PER_OBSTACLE, POINTS_LEVEL_BONUS,
+            OBSTACLE_SPAWN_INTERVAL, MIN_OBSTACLE_WIDTH, MAX_OBSTACLE_WIDTH
+        );
+    }
+
+    public static TruckaJumpaConfig presetHard() {
+        return new TruckaJumpaConfig(28, 0, 4, 2, 2, 99, 120, 100, 5, 2, 4);
+    }
+
+    // -------------------------------------------------------------------------
+    // Event codes
+    // -------------------------------------------------------------------------
+    public static final int EVT_NONE = 0;
+    public static final int EVT_ALREADY_JUMPING = 1;
+    public static final int EVT_JUMP = 2;
+    public static final int EVT_TICK = 3;
+    public static final int EVT_CRASH = 4;
+    public static final int EVT_GAME_OVER = 5;
+    public static final int EVT_CLEARED = 6;
+    public static final int EVT_LEVEL_UP = 7;
+
+    public String getLastEventDescription() {
+        switch (lastEventCode) {
+            case -1: return TRUCKA_ERR_GAME_OVER;
+            case 1: return TRUCKA_ERR_ALREADY_JUMPING;
+            case 2: return TRUCKA_EVT_JUMP;
+            case 3: return TRUCKA_EVT_TICK;
